@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# Inspired by Thoughtbot laptop setup scripts. Some parts used directly and others with alterations.
+# https://github.com/thoughtbot/laptop
+# https://github.com/thoughtbot/dotfiles
+
+# TODO: Consider adding scripts to install the following xcode dependencies if necessary.
+#  These commands and description came from `brew doctor`. 
+#
+# Update them from Software Update in System Preferences or run:
+#   softwareupdate --all --install --force
+# 
+# If that doesn't show you an update run:
+#   sudo rm -rf /Library/Developer/CommandLineTools
+#   sudo xcode-select --install
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  # shellcheck disable=SC2059
+  printf "\\n$fmt\\n" "$@"
+}
+
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+if [ ! -d "$HOME/.antigen/" ]; then
+  fancy_echo "Installing Antigen..."
+  mkdir "$HOME/.antigen"
+  curl -L git.io/antigen > $HOME/.antigen/antigen.zsh
+fi
+
+update_shell() {
+  local shell_path;
+  shell_path="$(command -v zsh)"
+
+  fancy_echo "Changing your shell to zsh ..."
+  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
+    fancy_echo "Adding '$shell_path' to /etc/shells"
+    sudo sh -c "echo $shell_path >> /etc/shells"
+  fi
+  sudo chsh -s "$shell_path" "$USER"
+}
+
+case "$SHELL" in
+  */zsh)
+    if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
+      update_shell
+    fi
+    ;;
+  *)
+    update_shell
+    ;;
+esac
+
+if [ ! -d "$HOME/.dotfiles/" ]; then
+  fancy_echo "Updating dotfiles ..."
+  env RCRC=$HOME/.dotfiles/rcrc rcup
+fi
+
+if ! command -v brew >/dev/null; then
+  fancy_echo "Installing Homebrew ..."
+  curl -fsS \
+    'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
+
+#  export PATH="/usr/local/bin:$PATH"
+fi
+
+fancy_echo "Updating Homebrew formulae ..."
+brew bundle --no-upgrade --file=- <<EOF
+  tap "thoughtbot/formulae"
+  
+  # CLI
+  brew "git"
+  brew "rcm"
+  brew "awscli"
+  brew "github/gh/gh"
+  brew "httpie"
+  brew "jq"
+  brew "neovim"
+  brew "tmux"
+  
+  # UIs
+  cask "iterm2"
+  cask "postman"
+  cask "github"
+  
+  cask "firefox-developer-edition"
+  cask "brave-browser"
+  cask "google-chrome"
+  cask "microsoft-edge"
+  cask "microsoft-edge-beta"
+  
+  cask "visual-studio-code"
+  cask "dash"
+EOF
+
+fancy_echo "mac script done"

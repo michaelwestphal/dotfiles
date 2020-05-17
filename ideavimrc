@@ -1,0 +1,10 @@
+set surround
+set commentary
+set easymotion
+set multiple-cursors
+
+"
+" AceJump plugin related configuration
+"   Mimic easymotion <leader><leader>s functionality
+"
+"nnoremap <leader><leader>s :action AceAction<CR>
