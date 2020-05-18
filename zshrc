@@ -14,14 +14,10 @@ antigen bundle lukechilds/zsh-better-npm-completion
 antigen bundle zsh-users/zsh-autosuggestions
 
 # Load the theme
-antigen theme avit
+antigen theme fjpalacios/elessar-theme elessar
 
 # Tell antigen that you're done
 antigen apply
-
-#
-# ENV variables
-#
 
 # update LESS to exit when only one page to help git pager
 # https://stackoverflow.com/questions/48341920/git-branch-command-behaves-like-less#comment92614882_48370253
